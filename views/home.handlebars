@@ -5,14 +5,20 @@
     <th>Weight</th>
     <th>Date</th>
     <th>LBS</th>
+    <th>ID</th>
   </tr>
   {{#each workouts}}
   <tr>
-    <td></td>
+    <td>{{this.name}}</td>
+    <td>{{this.reps}}</td>
+    <td>{{this.weight}}</td>
+    <td>{{this.date}}</td>
+    <td>{{this.lbs}}</td>
+    <td><a href="/workouts/{{this.id}}/edit">Edit</a></td>
   </tr>
   {{/each}}
 </table>
-<form id="new-workout-form">
+<form id="new-workout-form" action="javascript:">
   <button type="submit">Submit</button>
 </form>
 

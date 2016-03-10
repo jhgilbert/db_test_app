@@ -24,14 +24,29 @@ app.get('/', function(req, res) {
     req.session.workouts = [];
   }
   context = {workouts: req.session.workouts};
+  console.log(context.workouts);
   res.render("home", context);
 });
 
 app.post('/workouts', function(req, res) {
-  // var newWorkout = JSON.parse(req.body);
-  // req.session.workouts.push(newWorkout);
-  console.log(JSON.parse(req.body));
+  console.log(req.body);
+  var newWorkout = req.body;
+  newWorkout.id = req.session.workouts.length;
+  req.session.workouts.push(newWorkout);
   res.send("OK");
+});
+
+app.get('/workouts/:id/edit', function(req, res) {
+  var id = parseInt(req.params.id);
+  var context = {};
+  for (var i = 0; i < req.session.workouts.length; i++) {
+    var workout = req.session.workouts[i];
+    if (workout.id == id) {
+      workoutToEdit = workout;
+    }
+  }
+  context.workout = workoutToEdit;
+  res.render("edit", context);
 });
 
 // ADD ERROR HANDLERS HERE

@@ -1,0 +1,39 @@
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Reps</th>
+    <th>Weight</th>
+    <th>Date</th>
+    <th>LBS</th>
+  </tr>
+  {{#each workouts}}
+  <tr>
+    <td></td>
+  </tr>
+  {{/each}}
+</table>
+<form id="new-workout-form">
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+var newWorkoutForm = document.getElementById("new-workout-form");
+newWorkoutForm.addEventListener("submit", function(event) {
+  event.preventDefault();
+  var newWorkoutPost = new XMLHttpRequest();
+  newWorkoutPost.open("POST", "/workouts", true);
+  newWorkoutPost.setRequestHeader("Content-Type", "application/json");
+  newWorkoutPost.addEventListener("load", function() {
+    console.log("Workout created.");
+  });
+  // need to get this data from the form.
+  var newWorkoutData = {
+    name: "Fake workout",
+    reps: 10,
+    weight: 150,
+    date: "11-10-2010",
+    lbs: false
+  };
+  newWorkoutPost.send(JSON.stringify(newWorkoutData));
+});
+</script>

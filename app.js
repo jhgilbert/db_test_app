@@ -20,12 +20,15 @@ app.use(bodyParser.json());
 
 // Routes
 app.get('/', function(req, res) {
+  res.redirect("/workouts");
+});
+
+app.get('/workouts', function(req, res) {
   if (!req.session.workouts) {
     req.session.workouts = [];
   }
   context = {workouts: req.session.workouts};
-  console.log(context.workouts);
-  res.render("home", context);
+  res.render("index", context);
 });
 
 app.post('/workouts', function(req, res) {

@@ -2,6 +2,10 @@ var express = require('express');
 var app = express();
 var session = require('express-session');
 app.use(session({secret:'NotActuallySecretAtAll'}));
+var methodOverride = require('method-override')
+
+// override with the X-HTTP-Method-Override header in the request
+app.use(methodOverride('_method'));
 
 // Handlebars templating
 var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
@@ -50,6 +54,27 @@ app.get('/workouts/:id/edit', function(req, res) {
   }
   context.workout = workoutToEdit;
   res.render("edit", context);
+});
+
+app.put('/workouts/:id', function(req, res) {
+  console.log(req.body, "body");
+  console.log(req.params, "params");
+  console.log(req.query, "query");
+  var id = parseInt(req.params.id);
+  for (var i = 0; i < req.session.workouts.length; i++) {
+    var workout = req.session.workouts[i];
+    if (workout.id == id) {
+      var updatedWorkout = req.body;
+      if (!updatedWorkout.lbs) {
+        updatedWorkout.lbs = false;
+      } else {
+        updatedWorkout.lbs = true;
+      }
+      updatedWorkout.id = id;
+      req.session.workouts[i] = updatedWorkout;
+    }
+  }
+  res.redirect("/workouts");
 });
 
 // ADD ERROR HANDLERS HERE

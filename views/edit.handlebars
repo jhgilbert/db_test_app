@@ -1,12 +1,12 @@
-<form action="javascript:">
-  <p><label>Name <input type="text" value="{{workout.name}}"></label></p>
-  <p><label>Reps <input type="text" value="{{workout.reps}}"></label></p>
-  <p><label>Weight <input type="text" value="{{workout.weight}}"></label></p>
-  <p><label>Date <input type="date" value="2015-10-10"></label></p>
+<form action="/workouts/{{workout.id}}?_method=PUT" method="POST">
+  <p><label>Name <input type="text" name="name" value="{{workout.name}}"></label></p>
+  <p><label>Reps <input type="text" name="reps" value="{{workout.reps}}"></label></p>
+  <p><label>Weight <input type="text" name="weight" value="{{workout.weight}}"></label></p>
+  <p><label>Date <input type="date" name="date" value="2015-10-10"></label></p>
   {{#if workout.lbs}}
-  <p><label>LBS <input type="checkbox" checked></label></p>
+  <p><label>LBS <input type="checkbox" name="lbs" checked></label></p>
   {{else}}
-  <p><label>LBS <input type="checkbox"></label></p>
+  <p><label>LBS <input type="checkbox" name="lbs"></label></p>
   {{/if}}
   <button type="submit">Submit</button>
 </form>

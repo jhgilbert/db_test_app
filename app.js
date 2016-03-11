@@ -33,14 +33,14 @@ var pool = mysql.createPool({
 
 app.get('/reset-table',function(req,res,next){
   var context = {};
-  pool.query("DROP TABLE IF EXISTS workouts", function(err){ //replace your connection pool with the your variable containing the connection pool
+  pool.query("DROP TABLE IF EXISTS workouts", function(err){
     var createString = "CREATE TABLE workouts("+
-    "id INT PRIMARY KEY AUTO_INCREMENT,"+
-    "name VARCHAR(255) NOT NULL,"+
-    "reps INT,"+
-    "weight INT,"+
-    "date DATE,"+
-    "lbs BOOLEAN)";
+      "id INT PRIMARY KEY AUTO_INCREMENT,"+
+      "name VARCHAR(255) NOT NULL,"+
+      "reps INT,"+
+      "weight INT,"+
+      "date DATE,"+
+      "lbs BOOLEAN)";
     pool.query(createString, function(err){
       context.results = "Table reset";
       res.redirect("/workouts");
@@ -48,7 +48,7 @@ app.get('/reset-table',function(req,res,next){
   });
 });
 
-// Routes
+// Index routes (listing of workouts)
 app.get('/', function(req, res) {
   res.redirect("/workouts");
 });
@@ -67,14 +67,17 @@ app.get('/workouts', function(req, res) {
   });
 });
 
+// create a new workout
 app.post('/workouts', function(req, res) {
   var newWorkout = req.body;
   var lbsVal;
+  // set pounds value
   if (newWorkout.lbs) {
     lbsVal = 1;
   } else {
     lbsVal = 0;
   }
+  // submit values to database
   pool.query("INSERT INTO workouts(name, weight, lbs, date, reps) VALUES (?,?,?,?,?)", [newWorkout.name, newWorkout.weight, lbsVal, newWorkout.date, newWorkout.reps], function(err, result) {
     if (err) {
       console.log(err);
@@ -85,6 +88,7 @@ app.post('/workouts', function(req, res) {
   });
 });
 
+// edit a workout
 app.get('/workouts/:id/edit', function(req, res) {
   var id = parseInt(req.params.id);
   var context = {};
@@ -101,6 +105,7 @@ app.get('/workouts/:id/edit', function(req, res) {
   });
 });
 
+// update a workout (occurs from the edit page)
 app.put('/workouts/:id', function(req, res) {
   var id = parseInt(req.params.id);
   pool.query("SELECT * FROM workouts WHERE id=?", id, function(err, result){
@@ -110,25 +115,28 @@ app.put('/workouts/:id', function(req, res) {
     }
     if(result.length == 1){
       var currentValues = result[0];
+      // set lbs value
       var lbsValue;
       if (req.body.lbs) {
         lbsValue = true;
       } else {
         lbsValue = false;
       }
+      // update workout information
       pool.query("UPDATE workouts SET name=?, reps=?, weight=?, lbs=?, date=? WHERE id=? ",
         [req.body.name || currentValues.name, req.body.reps || currentValues.reps, req.body.weight || currentValues.weight, lbsValue, req.body.date || currentValues.date, id],
         function(err, result){
-        if(err){
-          next(err);
-          return;
-        }
-        res.redirect("/workouts");
-      });
+          if(err){
+            next(err);
+            return;
+          }
+          res.redirect("/workouts");
+        });
     }
   });
 });
 
+// delete a workout
 app.delete('/workouts/:id', function(req, res) {
   var id = parseInt(req.params.id);
   pool.query("DELETE FROM workouts WHERE id=?", id, function(err, result) {
@@ -140,7 +148,12 @@ app.delete('/workouts/:id', function(req, res) {
   });
 });
 
-// ADD ERROR HANDLERS HERE
+// error handlers
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+  res.status(404).send('Page not found!');
+});
 
 // Listen on designated port
 app.listen(app.get('port'), function() {

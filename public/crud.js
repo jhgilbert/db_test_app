@@ -146,7 +146,7 @@ function setDeleteFormListenerOn(forms) {
 // populate workout form fields
 function populateWorkoutFieldsIn(form) {
   form.elements['name'].value = "Test name";
-  form.elements['reps'].value = 11;
-  form.elements['weight'].value = 110;
+  form.elements['reps'].value = Math.floor((Math.random() * 50) + 1);;
+  form.elements['weight'].value = Math.floor((Math.random() * 150) + 1);;;
   form.elements['date'].value = '2010-10-10';
 }

@@ -27,6 +27,10 @@
   <button type="submit">Create Test Workout</button>
 </form>
 
+<form id="delete-all" action="/reset-table" method="GET">
+  <button type="submit">Delete All Workouts</button>
+</form>
+
 <script>
 //var newWorkoutForm = document.getElementById("new-workout-form");
 var createTestWorkoutForm = document.getElementById("create-test-workout");
@@ -58,12 +62,24 @@ createTestWorkoutForm.addEventListener("submit", function(event) {
       newTd.textContent = newWorkoutData[key];
       newTr.appendChild(newTd);
     });
+    // add edit button
     var editTd = document.createElement("td");
     var editLink = document.createElement("a");
     editLink.setAttribute("href", "/workouts/" + id + "/edit");
     editLink.textContent = "Edit";
     editTd.appendChild(editLink);
     newTr.appendChild(editTd);
+    // add delete button
+    var deleteForm = document.createElement("form");
+    deleteForm.setAttribute("method", "POST");
+    deleteForm.setAttribute("action", "/workouts/" + id + "?_method=DELETE");
+    var submitButton = document.createElement("button");
+    submitButton.setAttribute("type", "submit");
+    submitButton.textContent = "Delete";
+    var deleteTd = document.createElement("td");
+    deleteForm.appendChild(submitButton);
+    deleteTd.appendChild(deleteForm);
+    newTr.appendChild(deleteTd);
   });
   newWorkoutPost.send(JSON.stringify(newWorkoutData));
 });

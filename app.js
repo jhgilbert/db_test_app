@@ -22,70 +22,120 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// Connect to database
+var mysql = require('mysql');
+var pool = mysql.createPool({
+  host  : 'localhost',
+  user  : 'FILL IN HERE',
+  password: 'FILL IN HERE',
+  database: 'student'
+});
+
+// Database reset route
+
+app.get('/reset-table',function(req,res,next){
+  var context = {};
+  pool.query("DROP TABLE IF EXISTS workouts", function(err){ //replace your connection pool with the your variable containing the connection pool
+    var createString = "CREATE TABLE workouts("+
+    "id INT PRIMARY KEY AUTO_INCREMENT,"+
+    "name VARCHAR(255) NOT NULL,"+
+    "reps INT,"+
+    "weight INT,"+
+    "date DATE,"+
+    "lbs BOOLEAN)";
+    pool.query(createString, function(err){
+      context.results = "Table reset";
+      res.redirect("/workouts");
+    })
+  });
+});
+
 // Routes
 app.get('/', function(req, res) {
   res.redirect("/workouts");
 });
 
 app.get('/workouts', function(req, res) {
-  if (!req.session.workouts) {
-    req.session.workouts = [];
-  }
-  context = {workouts: req.session.workouts};
-  res.render("index", context);
+  var context = {};
+  pool.query('SELECT * FROM workouts', function(err, rows, fields){
+    if (err) {
+      console.log(err);
+    }
+    context.workouts = rows;
+    res.render("index", context);
+  });
 });
 
 app.post('/workouts', function(req, res) {
+  var newWorkout = req.body;
+  pool.query("INSERT INTO workouts(name) VALUES (?)", newWorkout.name, function(err, result) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    res.send(JSON.stringify(result.insertId));
+  });
+  /*
   console.log(req.body);
   var newWorkout = req.body;
   newWorkout.id = req.session.workouts.length;
   req.session.workouts.push(newWorkout);
   res.send(newWorkout.id.toString());
+  */
 });
 
 app.get('/workouts/:id/edit', function(req, res) {
   var id = parseInt(req.params.id);
   var context = {};
-  for (var i = 0; i < req.session.workouts.length; i++) {
-    var workout = req.session.workouts[i];
-    if (workout.id == id) {
-      workoutToEdit = workout;
+  pool.query("SELECT * FROM workouts WHERE id=?", id, function(err, result){
+    if(err){
+      console.log(err);
+      return;
     }
-  }
-  context.workout = workoutToEdit;
-  res.render("edit", context);
+    if(result.length == 1){
+      context.workout = result[0];
+      res.render("edit", context);
+    }
+  });
 });
 
 app.put('/workouts/:id', function(req, res) {
-  console.log(req.body, "body");
-  console.log(req.params, "params");
-  console.log(req.query, "query");
   var id = parseInt(req.params.id);
-  for (var i = 0; i < req.session.workouts.length; i++) {
-    var workout = req.session.workouts[i];
-    if (workout.id == id) {
-      var updatedWorkout = req.body;
-      if (!updatedWorkout.lbs) {
-        updatedWorkout.lbs = false;
-      } else {
-        updatedWorkout.lbs = true;
-      }
-      updatedWorkout.id = id;
-      req.session.workouts[i] = updatedWorkout;
+  pool.query("SELECT * FROM workouts WHERE id=?", id, function(err, result){
+    if(err){
+      console.log(err);
+      return;
     }
-  }
-  res.redirect("/workouts");
+    if(result.length == 1){
+      var currentValues = result[0];
+      var lbsValue;
+      if (req.body.lbs) {
+        lbsValue = true;
+      } else {
+        lbsValue = false;
+      }
+      pool.query("UPDATE workouts SET name=?, weight=?, lbs=? WHERE id=? ",
+        [req.body.name || currentValues.name, req.body.weight || currentValues.weight, lbsValue, id],
+        function(err, result){
+        if(err){
+          next(err);
+          return;
+        }
+        res.redirect("/workouts");
+      });
+    }
+  });
 });
 
 app.delete('/workouts/:id', function(req, res) {
   var id = parseInt(req.params.id);
-  for (var i = 0; i < req.session.workouts.length; i++) {
-    var workout = req.session.workouts[i];
-    if (workout.id == id) {
-      req.session.workouts.splice(i, 1);
+  pool.query("DELETE * FROM workouts WHERE id=?", id, function(err, result) {
+    if (err) {
+      console.log(err);
+      res.send("ERROR");
     }
-  }
-  res.redirect("/workouts"); 
+    res.send("OK");
+  });
 });
 
 // ADD ERROR HANDLERS HERE

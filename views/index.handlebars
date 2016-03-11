@@ -1,3 +1,36 @@
+<style>
+  th {
+    text-align: left;
+    padding-right: 10px;
+    margin: 5px;
+  }
+
+  td {
+    padding-right: 10px;
+    margin: 5px;
+  }
+
+
+  .button, button {
+    border: 1px solid black;
+    background-color: lightgray;
+    padding: 5px;
+    text-decoration: none;
+    color: black;
+    font-size: 1em;
+    font-family: Helvetica, sans-serif;
+    margin: 0;
+    border-radius: 5px;
+  }
+
+  .delete-form {
+    padding: 0px;
+    margin-bottom: 0px;
+  }
+</style>
+
+<h1>Workouts</h1>
+
 <table>
   <tr>
     <th>Name</th>
@@ -5,29 +38,31 @@
     <th>Weight</th>
     <th>Date</th>
     <th>LBS</th>
-    <th>ID</th>
   </tr>
   {{#each workouts}}
-  <tr>
+  <tr id="workout-tr-{{this.id}}">
     <td>{{this.name}}</td>
     <td>{{this.reps}}</td>
     <td>{{this.weight}}</td>
     <td>{{this.date}}</td>
     <td>
       {{#if this.lbs}}
-        true
+      true
       {{else}}
-        false
+      false
       {{/if}}
     </td>
-    <td><a href="/workouts/{{this.id}}/edit">Edit</a></td>
-    <td><form action="/workouts/{{this.id}}?_method=DELETE" method="POST">
+    <td><a class="button" href="/workouts/{{this.id}}/edit">Edit</a></td>
+    <td><form class="delete-form" action="javascript:">
+      <input type="hidden" name="id" value="{{this.id}}">
       <button type="submit">Delete</button>
     </form>
-    </td>
-  </tr>
-  {{/each}}
+  </td>
+</tr>
+{{/each}}
 </table>
+
+<h2>Create a workout</h2>
 
 <form id="create-workout" action="javascript:">
   <p><label>Name <input type="text" name="name"></label></p>
@@ -38,13 +73,52 @@
   <button type="submit">Submit</button>
 </form>
 
+<form id="populate-form" action="javascript:" method="GET">
+  <button type="submit">Populate Form</button>
+</form>
+
 <form id="delete-all" action="/reset-table" method="GET">
   <button type="submit">Delete All Workouts</button>
 </form>
 
 <script>
-//var newWorkoutForm = document.getElementById("new-workout-form");
+var deleteForms = document.getElementsByClassName("delete-form");
+
+function deleteWorkout(idToDelete) {
+  var deleteRequest = new XMLHttpRequest();
+
+  deleteRequest.open("POST", "/workouts/" + idToDelete + "?_method=DELETE", true);
+  deleteRequest.addEventListener("load", function() {
+    if (deleteRequest.responseText == "ERROR") {
+      alert("Error deleting workout. Please try again.");
+      return;
+    }
+    console.log("DELETED");
+    console.log("workout-tr-" + idToDelete);
+    var trToDelete = document.getElementById("workout-tr-" + idToDelete);
+    trToDelete.parentNode.removeChild(trToDelete);
+  });
+  deleteRequest.send(null);
+};
+
+for (var i=0; i < deleteForms.length; i++) {
+  deleteForms[i].addEventListener("submit", function(event) {
+    var idToDelete = event.target.elements['id'].value;
+    deleteWorkout(idToDelete);
+  });
+}
+
 var newWorkoutForm = document.getElementById("create-workout");
+
+var populateForm = document.getElementById("populate-form");
+
+populateForm.addEventListener("submit", function(event) {
+  event.preventDefault();
+  newWorkoutForm.elements['name'].value = "Test name";
+  newWorkoutForm.elements['reps'].value = 11;
+  newWorkoutForm.elements['weight'].value = 110;
+  newWorkoutForm.elements['date'].value = '2010-10-10';
+});
 
 newWorkoutForm.addEventListener("submit", function(event) {
   event.preventDefault();
@@ -61,7 +135,17 @@ newWorkoutForm.addEventListener("submit", function(event) {
     lbs: newWorkoutForm.elements['lbs'].checked
   };
 
+  if (newWorkoutData.name == "") {
+    alert("Name cannot be blank.");
+    return;
+  }
+
   newWorkoutPost.addEventListener("load", function() {
+    if (newWorkoutPost.responseText == "ERROR") {
+      alert("Error creating workout. Please try again.");
+      return;
+    }
+    newWorkoutForm.reset();
     var id = newWorkoutPost.responseText;
     console.log(newWorkoutPost.responseText);
     console.log("Workout created.");
@@ -78,12 +162,22 @@ newWorkoutForm.addEventListener("submit", function(event) {
     var editLink = document.createElement("a");
     editLink.setAttribute("href", "/workouts/" + id + "/edit");
     editLink.textContent = "Edit";
+    editLink.classList.add("button");
     editTd.appendChild(editLink);
     newTr.appendChild(editTd);
     // add delete button
     var deleteForm = document.createElement("form");
-    deleteForm.setAttribute("method", "POST");
-    deleteForm.setAttribute("action", "/workouts/" + id + "?_method=DELETE");
+    deleteForm.setAttribute("action", "javascript:");
+    deleteForm.classList.add("delete-form");
+    deleteForm.addEventListener("submit", function(event) {
+      var idToDelete = event.target.elements['id'].value;
+      deleteWorkout(idToDelete);
+    });
+    var hiddenField = document.createElement("input");
+    hiddenField.setAttribute("type", "hidden");
+    hiddenField.setAttribute("value", id);
+    hiddenField.setAttribute("name", "id");
+    deleteForm.appendChild(hiddenField);
     var submitButton = document.createElement("button");
     submitButton.setAttribute("type", "submit");
     submitButton.textContent = "Delete";
@@ -91,7 +185,8 @@ newWorkoutForm.addEventListener("submit", function(event) {
     deleteForm.appendChild(submitButton);
     deleteTd.appendChild(deleteForm);
     newTr.appendChild(deleteTd);
+    newTr.setAttribute("id", "workout-tr-" + id);
   });
-  newWorkoutPost.send(JSON.stringify(newWorkoutData));
+newWorkoutPost.send(JSON.stringify(newWorkoutData));
 });
 </script>

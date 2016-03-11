@@ -78,6 +78,7 @@ app.post('/workouts', function(req, res) {
   pool.query("INSERT INTO workouts(name, weight, lbs, date, reps) VALUES (?,?,?,?,?)", [newWorkout.name, newWorkout.weight, lbsVal, newWorkout.date, newWorkout.reps], function(err, result) {
     if (err) {
       console.log(err);
+      res.send("ERROR");
       return;
     }
     res.send(JSON.stringify(result.insertId));
@@ -130,7 +131,7 @@ app.put('/workouts/:id', function(req, res) {
 
 app.delete('/workouts/:id', function(req, res) {
   var id = parseInt(req.params.id);
-  pool.query("DELETE * FROM workouts WHERE id=?", id, function(err, result) {
+  pool.query("DELETE FROM workouts WHERE id=?", id, function(err, result) {
     if (err) {
       console.log(err);
       res.send("ERROR");

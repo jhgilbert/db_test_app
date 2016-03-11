@@ -29,8 +29,13 @@
   {{/each}}
 </table>
 
-<form id="create-test-workout" action="javascript:">
-  <button type="submit">Create Test Workout</button>
+<form id="create-workout" action="javascript:">
+  <p><label>Name <input type="text" name="name"></label></p>
+  <p><label>Reps <input type="text" name="reps"></label></p>
+  <p><label>Weight <input type="text" name="weight"></label></p>
+  <p><label>Date <input type="date" name="date"></label></p>
+  <p><label>LBS <input type="checkbox" name="lbs"></label></p>
+  <button type="submit">Submit</button>
 </form>
 
 <form id="delete-all" action="/reset-table" method="GET">
@@ -39,9 +44,9 @@
 
 <script>
 //var newWorkoutForm = document.getElementById("new-workout-form");
-var createTestWorkoutForm = document.getElementById("create-test-workout");
+var newWorkoutForm = document.getElementById("create-workout");
 
-createTestWorkoutForm.addEventListener("submit", function(event) {
+newWorkoutForm.addEventListener("submit", function(event) {
   event.preventDefault();
   var newWorkoutPost = new XMLHttpRequest();
   newWorkoutPost.open("POST", "/workouts", true);
@@ -49,11 +54,11 @@ createTestWorkoutForm.addEventListener("submit", function(event) {
 
   // need to get this data from the form.
   var newWorkoutData = {
-    name: "Fake workout",
-    reps: 10,
-    weight: 150,
-    date: "2010-10-10",
-    lbs: false
+    name: newWorkoutForm.elements['name'].value,
+    reps: newWorkoutForm.elements['reps'].value,
+    weight: newWorkoutForm.elements['weight'].value,
+    date: newWorkoutForm.elements['date'].value,
+    lbs: newWorkoutForm.elements['lbs'].checked
   };
 
   newWorkoutPost.addEventListener("load", function() {
@@ -89,24 +94,4 @@ createTestWorkoutForm.addEventListener("submit", function(event) {
   });
   newWorkoutPost.send(JSON.stringify(newWorkoutData));
 });
-/*
-newWorkoutForm.addEventListener("submit", function(event) {
-  event.preventDefault();
-  var newWorkoutPost = new XMLHttpRequest();
-  newWorkoutPost.open("POST", "/workouts", true);
-  newWorkoutPost.setRequestHeader("Content-Type", "application/json");
-  newWorkoutPost.addEventListener("load", function() {
-    console.log("Workout created.");
-  });
-  // need to get this data from the form.
-  var newWorkoutData = {
-    name: "Fake workout",
-    reps: 10,
-    weight: 150,
-    date: "11-10-2010",
-    lbs: false
-  };
-  newWorkoutPost.send(JSON.stringify(newWorkoutData));
-});
-*/
 </script>

@@ -60,6 +60,9 @@ app.get('/workouts', function(req, res) {
       console.log(err);
     }
     context.workouts = rows;
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].date = rows[i].date.toISOString().substring(0, 10);
+    }
     res.render("index", context);
   });
 });

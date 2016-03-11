@@ -1,39 +1,6 @@
-<style>
-  th {
-    text-align: left;
-    padding-right: 10px;
-    margin: 5px;
-  }
-
-  td {
-    padding-right: 10px;
-    margin: 5px;
-  }
-
-  .button, button {
-    border: 1px solid black;
-    background-color: lightgray;
-    padding: 5px;
-    text-decoration: none;
-    color: black;
-    font-size: 1em;
-    font-family: Helvetica, sans-serif;
-    margin: 0;
-    border-radius: 5px;
-  }
-
-  .delete-form {
-    padding: 0px;
-    margin-bottom: 0px;
-  }
-
-  .button {
-    cursor: default;
-  }
-</style>
-
 <h1>Workouts</h1>
 
+<!-- workouts table -->
 <table>
   <tr>
     <th>Name</th>
@@ -65,6 +32,7 @@
 {{/each}}
 </table>
 
+<!-- create a new workout -->
 <h2>Create a workout</h2>
 
 <form id="create-workout" action="javascript:">
@@ -76,10 +44,12 @@
   <button type="submit">Submit</button>
 </form>
 
+<!-- fill in test data for those too lazy to keep filling out a form :) -->
 <form id="populate-form" action="javascript:" method="GET">
   <button type="submit">Populate Form</button>
 </form>
 
+<!-- delete all rows from the db -->
 <form id="delete-all" action="/reset-table" method="GET">
   <button type="submit">Delete All Workouts</button>
 </form>

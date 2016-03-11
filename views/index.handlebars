@@ -13,7 +13,13 @@
     <td>{{this.reps}}</td>
     <td>{{this.weight}}</td>
     <td>{{this.date}}</td>
-    <td>{{this.lbs}}</td>
+    <td>
+      {{#if this.lbs}}
+        true
+      {{else}}
+        false
+      {{/if}}
+    </td>
     <td><a href="/workouts/{{this.id}}/edit">Edit</a></td>
     <td><form action="/workouts/{{this.id}}?_method=DELETE" method="POST">
       <button type="submit">Delete</button>
@@ -46,7 +52,7 @@ createTestWorkoutForm.addEventListener("submit", function(event) {
     name: "Fake workout",
     reps: 10,
     weight: 150,
-    date: "11-10-2010",
+    date: "2010-10-10",
     lbs: false
   };
 

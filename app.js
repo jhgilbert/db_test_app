@@ -1,7 +1,5 @@
 var express = require('express');
 var app = express();
-var session = require('express-session');
-app.use(session({secret:'NotActuallySecretAtAll'}));
 
 // override with the _method param in the URL
 var methodOverride = require('method-override');
@@ -46,7 +44,7 @@ app.get('/reset-table',function(req,res,next){
     pool.query(createString, function(err){
       context.results = "Table reset";
       res.redirect("/workouts");
-    })
+    });
   });
 });
 
@@ -68,20 +66,19 @@ app.get('/workouts', function(req, res) {
 
 app.post('/workouts', function(req, res) {
   var newWorkout = req.body;
-  pool.query("INSERT INTO workouts(name) VALUES (?)", newWorkout.name, function(err, result) {
+  var lbsVal;
+  if (newWorkout.lbs) {
+    lbsVal = 1;
+  } else {
+    lbsVal = 0;
+  }
+  pool.query("INSERT INTO workouts(name, weight, lbs, date, reps) VALUES (?,?,?,?,?)", [newWorkout.name, newWorkout.weight, lbsVal, newWorkout.date, newWorkout.reps], function(err, result) {
     if (err) {
       console.log(err);
       return;
     }
     res.send(JSON.stringify(result.insertId));
   });
-  /*
-  console.log(req.body);
-  var newWorkout = req.body;
-  newWorkout.id = req.session.workouts.length;
-  req.session.workouts.push(newWorkout);
-  res.send(newWorkout.id.toString());
-  */
 });
 
 app.get('/workouts/:id/edit', function(req, res) {
@@ -94,6 +91,7 @@ app.get('/workouts/:id/edit', function(req, res) {
     }
     if(result.length == 1){
       context.workout = result[0];
+      context.workout.date = context.workout.date.toISOString().substring(0, 10);
       res.render("edit", context);
     }
   });
@@ -114,8 +112,8 @@ app.put('/workouts/:id', function(req, res) {
       } else {
         lbsValue = false;
       }
-      pool.query("UPDATE workouts SET name=?, weight=?, lbs=? WHERE id=? ",
-        [req.body.name || currentValues.name, req.body.weight || currentValues.weight, lbsValue, id],
+      pool.query("UPDATE workouts SET name=?, reps=?, weight=?, lbs=?, date=? WHERE id=? ",
+        [req.body.name || currentValues.name, req.body.reps || currentValues.reps, req.body.weight || currentValues.weight, lbsValue, req.body.date || currentValues.date, id],
         function(err, result){
         if(err){
           next(err);

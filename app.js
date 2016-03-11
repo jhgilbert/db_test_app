@@ -2,9 +2,9 @@ var express = require('express');
 var app = express();
 var session = require('express-session');
 app.use(session({secret:'NotActuallySecretAtAll'}));
-var methodOverride = require('method-override')
 
-// override with the X-HTTP-Method-Override header in the request
+// override with the _method param in the URL
+var methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 
 // Handlebars templating
@@ -40,7 +40,7 @@ app.post('/workouts', function(req, res) {
   var newWorkout = req.body;
   newWorkout.id = req.session.workouts.length;
   req.session.workouts.push(newWorkout);
-  res.send("OK");
+  res.send(newWorkout.id.toString());
 });
 
 app.get('/workouts/:id/edit', function(req, res) {
@@ -75,6 +75,17 @@ app.put('/workouts/:id', function(req, res) {
     }
   }
   res.redirect("/workouts");
+});
+
+app.delete('/workouts/:id', function(req, res) {
+  var id = parseInt(req.params.id);
+  for (var i = 0; i < req.session.workouts.length; i++) {
+    var workout = req.session.workouts[i];
+    if (workout.id == id) {
+      req.session.workouts.splice(i, 1);
+    }
+  }
+  res.redirect("/workouts"); 
 });
 
 // ADD ERROR HANDLERS HERE

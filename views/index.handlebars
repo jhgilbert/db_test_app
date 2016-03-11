@@ -15,15 +15,59 @@
     <td>{{this.date}}</td>
     <td>{{this.lbs}}</td>
     <td><a href="/workouts/{{this.id}}/edit">Edit</a></td>
+    <td><form action="/workouts/{{this.id}}?_method=DELETE" method="POST">
+      <button type="submit">Delete</button>
+    </form>
+    </td>
   </tr>
   {{/each}}
 </table>
-<form id="new-workout-form" action="javascript:">
-  <button type="submit">Submit</button>
+
+<form id="create-test-workout" action="javascript:">
+  <button type="submit">Create Test Workout</button>
 </form>
 
 <script>
-var newWorkoutForm = document.getElementById("new-workout-form");
+//var newWorkoutForm = document.getElementById("new-workout-form");
+var createTestWorkoutForm = document.getElementById("create-test-workout");
+
+createTestWorkoutForm.addEventListener("submit", function(event) {
+  event.preventDefault();
+  var newWorkoutPost = new XMLHttpRequest();
+  newWorkoutPost.open("POST", "/workouts", true);
+  newWorkoutPost.setRequestHeader("Content-Type", "application/json");
+
+  // need to get this data from the form.
+  var newWorkoutData = {
+    name: "Fake workout",
+    reps: 10,
+    weight: 150,
+    date: "11-10-2010",
+    lbs: false
+  };
+
+  newWorkoutPost.addEventListener("load", function() {
+    var id = newWorkoutPost.responseText;
+    console.log(newWorkoutPost.responseText);
+    console.log("Workout created.");
+    var tableBody = document.getElementsByTagName("tbody")[0];
+    var newTr = document.createElement("tr");
+    tableBody.appendChild(newTr);    
+    Object.keys(newWorkoutData).forEach(function(key, index) {
+      var newTd = document.createElement("td");
+      newTd.textContent = newWorkoutData[key];
+      newTr.appendChild(newTd);
+    });
+    var editTd = document.createElement("td");
+    var editLink = document.createElement("a");
+    editLink.setAttribute("href", "/workouts/" + id + "/edit");
+    editLink.textContent = "Edit";
+    editTd.appendChild(editLink);
+    newTr.appendChild(editTd);
+  });
+  newWorkoutPost.send(JSON.stringify(newWorkoutData));
+});
+/*
 newWorkoutForm.addEventListener("submit", function(event) {
   event.preventDefault();
   var newWorkoutPost = new XMLHttpRequest();
@@ -42,4 +86,5 @@ newWorkoutForm.addEventListener("submit", function(event) {
   };
   newWorkoutPost.send(JSON.stringify(newWorkoutData));
 });
+*/
 </script>

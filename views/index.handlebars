@@ -27,6 +27,10 @@
     padding: 0px;
     margin-bottom: 0px;
   }
+
+  .button {
+    cursor: default;
+  }
 </style>
 
 <h1>Workouts</h1>
@@ -81,112 +85,4 @@
   <button type="submit">Delete All Workouts</button>
 </form>
 
-<script>
-var deleteForms = document.getElementsByClassName("delete-form");
-
-function deleteWorkout(idToDelete) {
-  var deleteRequest = new XMLHttpRequest();
-
-  deleteRequest.open("POST", "/workouts/" + idToDelete + "?_method=DELETE", true);
-  deleteRequest.addEventListener("load", function() {
-    if (deleteRequest.responseText == "ERROR") {
-      alert("Error deleting workout. Please try again.");
-      return;
-    }
-    console.log("DELETED");
-    console.log("workout-tr-" + idToDelete);
-    var trToDelete = document.getElementById("workout-tr-" + idToDelete);
-    trToDelete.parentNode.removeChild(trToDelete);
-  });
-  deleteRequest.send(null);
-};
-
-for (var i=0; i < deleteForms.length; i++) {
-  deleteForms[i].addEventListener("submit", function(event) {
-    var idToDelete = event.target.elements['id'].value;
-    deleteWorkout(idToDelete);
-  });
-}
-
-var newWorkoutForm = document.getElementById("create-workout");
-
-var populateForm = document.getElementById("populate-form");
-
-populateForm.addEventListener("submit", function(event) {
-  event.preventDefault();
-  newWorkoutForm.elements['name'].value = "Test name";
-  newWorkoutForm.elements['reps'].value = 11;
-  newWorkoutForm.elements['weight'].value = 110;
-  newWorkoutForm.elements['date'].value = '2010-10-10';
-});
-
-newWorkoutForm.addEventListener("submit", function(event) {
-  event.preventDefault();
-  var newWorkoutPost = new XMLHttpRequest();
-  newWorkoutPost.open("POST", "/workouts", true);
-  newWorkoutPost.setRequestHeader("Content-Type", "application/json");
-
-  // need to get this data from the form.
-  var newWorkoutData = {
-    name: newWorkoutForm.elements['name'].value,
-    reps: newWorkoutForm.elements['reps'].value,
-    weight: newWorkoutForm.elements['weight'].value,
-    date: newWorkoutForm.elements['date'].value,
-    lbs: newWorkoutForm.elements['lbs'].checked
-  };
-
-  if (newWorkoutData.name == "") {
-    alert("Name cannot be blank.");
-    return;
-  }
-
-  newWorkoutPost.addEventListener("load", function() {
-    if (newWorkoutPost.responseText == "ERROR") {
-      alert("Error creating workout. Please try again.");
-      return;
-    }
-    newWorkoutForm.reset();
-    var id = newWorkoutPost.responseText;
-    console.log(newWorkoutPost.responseText);
-    console.log("Workout created.");
-    var tableBody = document.getElementsByTagName("tbody")[0];
-    var newTr = document.createElement("tr");
-    tableBody.appendChild(newTr);    
-    Object.keys(newWorkoutData).forEach(function(key, index) {
-      var newTd = document.createElement("td");
-      newTd.textContent = newWorkoutData[key];
-      newTr.appendChild(newTd);
-    });
-    // add edit button
-    var editTd = document.createElement("td");
-    var editLink = document.createElement("a");
-    editLink.setAttribute("href", "/workouts/" + id + "/edit");
-    editLink.textContent = "Edit";
-    editLink.classList.add("button");
-    editTd.appendChild(editLink);
-    newTr.appendChild(editTd);
-    // add delete button
-    var deleteForm = document.createElement("form");
-    deleteForm.setAttribute("action", "javascript:");
-    deleteForm.classList.add("delete-form");
-    deleteForm.addEventListener("submit", function(event) {
-      var idToDelete = event.target.elements['id'].value;
-      deleteWorkout(idToDelete);
-    });
-    var hiddenField = document.createElement("input");
-    hiddenField.setAttribute("type", "hidden");
-    hiddenField.setAttribute("value", id);
-    hiddenField.setAttribute("name", "id");
-    deleteForm.appendChild(hiddenField);
-    var submitButton = document.createElement("button");
-    submitButton.setAttribute("type", "submit");
-    submitButton.textContent = "Delete";
-    var deleteTd = document.createElement("td");
-    deleteForm.appendChild(submitButton);
-    deleteTd.appendChild(deleteForm);
-    newTr.appendChild(deleteTd);
-    newTr.setAttribute("id", "workout-tr-" + id);
-  });
-newWorkoutPost.send(JSON.stringify(newWorkoutData));
-});
-</script>
+<script src="../crud.js"></script>
